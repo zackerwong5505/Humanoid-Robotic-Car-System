@@ -1,0 +1,12 @@
+<launch>
+
+
+
+<!-- Detection node -->
+<node pkg="tutorial_pkg" name="stop" type="stop" output="screen" />
+
+
+
+
+</launch>
+

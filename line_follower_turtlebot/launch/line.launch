@@ -1,0 +1,7 @@
+<launch>
+
+
+<node pkg="line_follower_turtlebot" name="Velocity" type="navig" cwd="node" output="screen">
+</node>
+
+</launch>

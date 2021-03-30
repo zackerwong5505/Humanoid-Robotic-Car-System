@@ -1,0 +1,54 @@
+<launch>
+
+    <arg name="use_rosbot" default="false"/>
+    <arg name="use_gazebo" default="true"/>
+
+    <arg name="teach" default="true"/>
+    <arg name="recognize" default="false"/>
+
+    <arg if="$(arg teach)" name="chosen_world" value="rosbot_world_teaching"/>
+    <arg if="$(arg recognize)" name="chosen_world" value="rosbot_world_recognition"/>
+<arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="x_pos" default="0"/>
+  <arg name="y_pos" default="0"/>
+  <arg name="z_pos" default="0.0"/>
+<arg name = "StartRec" default = "false" />
+
+<include 
+file = "$(find gazebo_ros)/launch/empty_world.launch">
+<arg name = "world_name" value =  "$(find line_follower_turtlebot)/Maps/lfm1.world"/>
+</include> 
+
+<!-- Detection node -->
+<node pkg="line_follower_turtlebot" name="detection" type="detect" cwd="node" output="screen">
+</node>
+
+<!-- Robot commands node 
+<node pkg="line_follower_turtlebot" name="Velocity" type="navig" cwd="node" output="screen">
+</node> -->
+
+<node
+pkg = "rosbag"
+type = "record"
+name = "rosbag_record_all"
+respawn = "true"
+output = "screen"
+args = "-a -O BagFile -x /camera/(.*) "
+if = "$(arg StartRec)"
+/> 
+
+<param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" /> 
+
+<node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf"  args="-urdf -model turtlebot3_$(arg model) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" /> 
+    
+
+    
+   
+    <node pkg="find_object_2d" type="find_object_2d" name="find_object_2d">
+        <remap from="image" to="/raspicam_node/image"/>
+        <param name="gui" value="$(arg teach)"/>
+        <param if="$(arg recognize)" name="objects_path" value="$(find tutorial_pkg)/image_rec/"/>
+    </node>
+
+</launch>
+
